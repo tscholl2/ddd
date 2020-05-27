@@ -3,7 +3,7 @@ FROM alpine:3.11
 RUN apk update && \
     apk upgrade && \
     apk add bash sudo build-base openssl openssh nano \
-    python python3 nodejs npm \
+    python python3 nodejs npm go \
     sqlite tmux git curl wget bc xxd jq \
     python3-dev postgresql postgresql-dev \
     mariadb mariadb-dev \
