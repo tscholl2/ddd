@@ -1,21 +1,20 @@
-FROM alpine:3.11
+ARG USERID
+FROM debian:10.5-slim
 # Packages
-RUN apk update && \
-    apk upgrade && \
-    apk add bash sudo build-base openssl openssh nano \
-    python python3 nodejs npm go \
+RUN apt-get update && \
+    apt-get upgrade && \
+    apt-get install -y --no-recommends && \
+    sudo build-essential openssh nano \
+    python3 python3-dev golang-go \
     sqlite tmux git curl wget bc xxd jq \
-    python3-dev postgresql postgresql-dev \
-    mariadb mariadb-dev \
     libx11-dev libxkbfile-dev libsecret-dev \
     && \
+    curl -sL https://deb.nodesource.com/setup_current.x | sudo bash - && \
     npm -g --unsafe-perm install code-server
 # User administration
-RUN adduser -D user -s /bin/bash && \
+RUN useradd user -m -u $USERID && \
     passwd -d user && \
-    echo "user ALL=(ALL) ALL" > /etc/sudoers.d/user && \
-    chmod 0440 /etc/sudoers.d/user && \
-    visudo -c
+    usermod -aG sudo user
 USER user
 # Setup stuff
 RUN mkdir -p /home/user/certs && \
@@ -28,6 +27,7 @@ RUN mkdir -p /home/user/certs && \
     code-server --install-extension ms-python.python \
     code-server --install-extension ms-vscode.Go \
     code-server --install-extension ms-azuretools.vscode-docker \
-    code-server --install-extension ms-vscode.cpptools
+    code-server --install-extension ms-vscode.cpptools \
+    code-server --install-extension ms-vscode-remote.vscode-remote-extensionpack \
 WORKDIR /home/user
 ENTRYPOINT ["code-server","--bind-addr=0.0.0.0:8080","--cert=/home/user/certs/cert.pem","--cert-key=/home/user/certs/cert.key","/home/user/project"]
